@@ -1,29 +1,51 @@
 #!/bin/bash
 
-# i3-config-gen <directory> [output file]
 print_help ()
 {
-    echo "$0 <directory> [output file]"
+    echo "usage: $0 <configdir>"
+    echo "    'configdir' is a directory containing a Makefile that produces"
+    echo "    an i3 configuration file with a BUILD_DIR variable inside of your"
+    echo "    ~/.config/i3-config-gen directory"
 }
 
 if [[ $# -ge 1 ]]; then
     dir=$1
-    out=./config
-    if [[ $# -ge 2 ]]; then
-        out=$2
-    fi
 else
-    echo "Please provide a directory" 2>&1
+    echo "Please provide a configdir" 2>&1
     print_help 2>&1
     exit 1
 fi
 
-cat <(echo "# i3 config file (v4)")\
-    "$dir/theme.config"\
-    "$dir/monitors.config"\
-    "$dir/workspaces.config"\
-    "$dir/control.config"\
-    "$dir/local.config"\
-    "$dir/bar.config"\
-    "$dir/startup.config"\
-    > "$out"
+source_dir="$HOME/.config/i3-config-gen/$dir"
+if ! [[ -d "$source_dir" ]]; then
+    echo "Please provide a valid configdir" 2>&1
+    print_help 2>&1
+    exit 1
+fi
+
+# generate a private user /tmp dir if one hasn't been created
+user_dir="/tmp/$USER"
+build_dir="$user_dir/i3-config-gen-build"
+
+# create the config file in tmp
+mkdir -p -m 700 "$build_dir"
+make BUILD_DIR="$build_dir" -C "$source_dir"
+if [[ $? -ne 0 ]]; then
+    echo "Failed to generate config file!" 2>&1
+    exit 1
+fi
+
+# link the config file
+mkdir -p "$HOME/.config/i3"
+link="$HOME/.config/i3/config"
+target="$build_dir/config"
+
+if ! [[ -e "$link" ]] || ! [[ $(readlink "$link") == "$target" ]]; then
+    ln -s "$target" "$link"
+    if [[ $? -ne 0 ]]; then
+        if [[ $(readlink "$link") != "$target" ]]; then
+            echo "Failed to create a soft link with the config file!" 2>&1
+            exit 2
+        fi
+    fi
+fi
