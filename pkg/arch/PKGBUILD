@@ -1,0 +1,14 @@
+# Maintainer: Brandon Nguyen
+pkgname=i3-config-gen
+pkgver=0.1.0
+pkgrel=1
+epoch=
+pkgdesc=""
+arch=('any')
+url=""
+license=('GPL')
+depends=('python-yaml')
+
+package() {
+    make -C ../../../ prefix="$pkgdir/usr" install
+}
