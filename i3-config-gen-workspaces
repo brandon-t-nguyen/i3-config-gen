@@ -149,14 +149,14 @@ def main():
             # manual entry mode
             print("    ## Manual entry")
             print("    bindsym Return exec i3-input -F \"workspace %s\" -l 32 -P \"Go to: \", mode \"default\"")
-            print("    bindsym $mod+Return exec i3-input -F \"move container to workspace %s\" -l 32 -P \"Move to: \", mode \"default\"")
+            print("    bindsym $sup+Return exec i3-input -F \"move container to workspace %s\" -l 32 -P \"Move to: \", mode \"default\"")
             print("    bindsym BackSpace mode \"default\"")
             print("    bindsym Escape mode \"default\"")
 
             print("}")
 
             # keybind
-            print("bindsym $mod+w mode \"workspace\"")
+            print("bindsym $sup+w mode \"workspace\"")
 
             # generate workspaces for modes
             for mode in data['modes']:
